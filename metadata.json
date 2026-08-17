@@ -1,0 +1,10 @@
+{
+  "name": "Phoenix Dashboard",
+  "description": "Executive Command HUD and Productivity Management Platform featuring real-time financial analytics, Jalali/Gregorian strategic calendar, 7-day task matrix, social channels tracker, document vault, and intelligent workspace agents.",
+  "requestFramePermissions": [
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
