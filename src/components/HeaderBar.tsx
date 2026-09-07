@@ -30,6 +30,7 @@ import {
   Move,
   Grid,
   Sparkle,
+  Smartphone,
 } from 'lucide-react';
 import {
   Language,
@@ -37,6 +38,7 @@ import {
   UserAccount,
   CanvasWidthMode,
   CanvasLayoutMode,
+  CanvasOrientation,
   CanvasWallpaper,
 } from '../types';
 import {
@@ -54,12 +56,15 @@ interface HeaderBarProps {
   onSyncAllWidgetsTheme: (theme: ThemeMode) => void;
   canvasLayoutMode: CanvasLayoutMode;
   onCanvasLayoutModeChange: (mode: CanvasLayoutMode) => void;
+  canvasOrientation?: CanvasOrientation;
+  onCanvasOrientationChange?: (orientation: CanvasOrientation) => void;
   canvasWallpaper?: CanvasWallpaper;
   onCanvasWallpaperChange: (wallpaper: CanvasWallpaper) => void;
   showCoordinateGrid?: boolean;
   onToggleCoordinateGrid: () => void;
   canvasWidthMode: CanvasWidthMode;
   onCanvasWidthModeChange: (mode: CanvasWidthMode) => void;
+  onExpandRows?: (count?: number) => void;
   isPrivacyMode: boolean;
   onTogglePrivacy: () => void;
   onOpenSearch: () => void;
@@ -82,12 +87,15 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
   onSyncAllWidgetsTheme,
   canvasLayoutMode,
   onCanvasLayoutModeChange,
+  canvasOrientation = 'landscape',
+  onCanvasOrientationChange,
   canvasWallpaper,
   onCanvasWallpaperChange,
   showCoordinateGrid = true,
   onToggleCoordinateGrid,
   canvasWidthMode,
   onCanvasWidthModeChange,
+  onExpandRows,
   isPrivacyMode,
   onTogglePrivacy,
   onOpenSearch,
@@ -290,11 +298,59 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
                   </div>
                 </div>
 
-                {/* Section 2: Display Width Modes */}
+                {/* Section 2: Canvas Orientation (Landscape / Portrait) */}
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-300 block">
-                    {isFa ? '۲. عرض و ابعاد مانیتور:' : '2. Display / Screen Width:'}
+                    {isFa ? '۲. جهت‌گیری و چرخش صفحه (Orientation):' : '2. Canvas Orientation:'}
                   </label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button
+                      onClick={() => onCanvasOrientationChange?.('landscape')}
+                      className={`p-2 rounded-xl border text-center transition cursor-pointer flex items-center justify-center gap-2 ${
+                        canvasOrientation === 'landscape'
+                          ? 'bg-sky-600/30 border-sky-400 text-white ring-1 ring-sky-400 shadow-xs'
+                          : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      <Monitor className="w-3.5 h-3.5 text-sky-400" />
+                      <span className="text-xs font-bold">
+                        {isFa ? 'افقی (Landscape - ۱۲ ستون)' : 'Landscape (12 Cols)'}
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => onCanvasOrientationChange?.('portrait')}
+                      className={`p-2 rounded-xl border text-center transition cursor-pointer flex items-center justify-center gap-2 ${
+                        canvasOrientation === 'portrait'
+                          ? 'bg-sky-600/30 border-sky-400 text-white ring-1 ring-sky-400 shadow-xs'
+                          : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-xs font-bold">
+                        {isFa ? 'عمودی (Portrait - ۶ ستون)' : 'Portrait (6 Cols)'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Section 3: Display Width Modes & Presets */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold text-slate-300 block">
+                      {isFa ? '۳. نوع مانیتور و ابعاد نمایشگر:' : '3. Display / Screen Preset:'}
+                    </label>
+                    {onExpandRows && (
+                      <button
+                        onClick={() => onExpandRows(6)}
+                        className="text-[10px] text-sky-300 hover:text-sky-100 font-bold flex items-center gap-1 hover:underline cursor-pointer"
+                        title={isFa ? 'افزودن ۶ سطر به بوم' : 'Expand Rows'}
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>{isFa ? 'گسترش بینهایت (+۶ سطر)' : '+6 Rows'}</span>
+                      </button>
+                    )}
+                  </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                     {canvasModes.map((mode) => {
                       const Icon = mode.icon;
@@ -325,12 +381,12 @@ export const HeaderBar: React.FC<HeaderBarProps> = ({
                   </div>
                 </div>
 
-                {/* Section 3: Canvas Wallpaper & Blueprint Grid */}
+                {/* Section 4: Canvas Wallpaper & Blueprint Grid */}
                 <div className="space-y-2 border-t border-white/10 pt-2.5">
                   <div className="flex items-center justify-between">
                     <label className="text-[11px] font-bold text-slate-300 flex items-center gap-1.5">
                       <ImageIcon className="w-3.5 h-3.5 text-sky-400" />
-                      <span>{isFa ? '۳. طرح و والپیپر بوم:' : '3. Canvas Wallpaper & Grid:'}</span>
+                      <span>{isFa ? '۴. طرح و والپیپر بوم:' : '4. Canvas Wallpaper & Grid:'}</span>
                     </label>
 
                     {/* Coordinate Grid Toggle */}

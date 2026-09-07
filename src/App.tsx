@@ -45,6 +45,7 @@ import {
   ChatAttachment,
   CanvasWidthMode,
   CanvasLayoutMode,
+  CanvasOrientation,
   CanvasWallpaper,
 } from './types';
 import {
@@ -173,6 +174,17 @@ export default function App() {
 
   const handleCanvasWallpaperChange = (wallpaper: CanvasWallpaper) => {
     setState((prev) => ({ ...prev, canvasWallpaper: wallpaper }));
+  };
+
+  const handleCanvasOrientationChange = (orientation: CanvasOrientation) => {
+    setState((prev) => ({ ...prev, canvasOrientation: orientation }));
+  };
+
+  const handleExpandRows = (count: number = 6) => {
+    setState((prev) => ({
+      ...prev,
+      canvasRowsCount: (prev.canvasRowsCount || 24) + count,
+    }));
   };
 
   const handleToggleCoordinateGrid = () => {
@@ -748,12 +760,15 @@ export default function App() {
         onSyncAllWidgetsTheme={handleSyncAllWidgetsTheme}
         canvasLayoutMode={state.canvasLayoutMode || 'spatial-freeform'}
         onCanvasLayoutModeChange={handleCanvasLayoutModeChange}
+        canvasOrientation={state.canvasOrientation || 'landscape'}
+        onCanvasOrientationChange={handleCanvasOrientationChange}
         canvasWallpaper={state.canvasWallpaper}
         onCanvasWallpaperChange={handleCanvasWallpaperChange}
         showCoordinateGrid={state.showCoordinateGrid !== false}
         onToggleCoordinateGrid={handleToggleCoordinateGrid}
         canvasWidthMode={state.canvasWidthMode || 'wide'}
         onCanvasWidthModeChange={handleCanvasWidthModeChange}
+        onExpandRows={handleExpandRows}
         isPrivacyMode={state.isPrivacyMode}
         onTogglePrivacy={handleTogglePrivacy}
         onOpenSearch={() => setIsSearchOpen(true)}
@@ -773,9 +788,12 @@ export default function App() {
         widgets={state.widgets}
         language={state.language}
         layoutMode={state.canvasLayoutMode || 'spatial-freeform'}
+        canvasOrientation={state.canvasOrientation || 'landscape'}
         wallpaper={state.canvasWallpaper}
         showCoordinateGrid={state.showCoordinateGrid !== false}
         canvasWidthMode={state.canvasWidthMode || 'wide'}
+        canvasRowsCount={state.canvasRowsCount || 24}
+        canvasColsCount={state.canvasColsCount}
         draggedWidgetId={draggedWidgetId}
         dragOverWidgetId={dragOverWidgetId}
         onUpdateWidget={handleUpdateWidget}
@@ -785,6 +803,8 @@ export default function App() {
         onToggleFloat={handleToggleFloat}
         onMoveWidget={handleMoveWidget}
         onSetWidgetPosition={handleSetWidgetPosition}
+        onExpandRows={handleExpandRows}
+        onCanvasOrientationChange={handleCanvasOrientationChange}
         onDragStart={(id) => {
           draggedWidgetIdRef.current = id;
           setDraggedWidgetId(id);

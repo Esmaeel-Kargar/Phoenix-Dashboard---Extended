@@ -11,6 +11,15 @@ export type ThemeMode =
   | 'nordic';
 
 export type CanvasLayoutMode = 'spatial-freeform' | 'smart-grid';
+export type CanvasOrientation = 'landscape' | 'portrait';
+export type DisplayPreset =
+  | 'desktop-16-9'
+  | 'ultrawide-21-9'
+  | 'tablet-landscape'
+  | 'tablet-portrait'
+  | 'phone-portrait'
+  | 'phone-landscape'
+  | 'infinite';
 
 export interface CanvasWallpaper {
   id: string;
@@ -363,10 +372,14 @@ export interface AppState {
   language: Language;
   theme: ThemeMode;
   canvasLayoutMode?: CanvasLayoutMode; // 'spatial-freeform' | 'smart-grid'
+  canvasOrientation?: CanvasOrientation; // 'landscape' | 'portrait'
+  displayPreset?: DisplayPreset;
   canvasWallpaper?: CanvasWallpaper;
   showCoordinateGrid?: boolean;
   canvasWidthMode?: CanvasWidthMode; // standard (1440px), wide (1920px), ultrawide (2560px), fluid (100% edge-to-edge)
   gridColumnsMode?: GridColumnsMode; // grid columns scaling for wide screens
+  canvasRowsCount?: number; // total rows for spatial canvas (expandable to infinity)
+  canvasColsCount?: number; // total cols (12, 16, 24)
   isPrivacyMode: boolean; // hide balances
   widgets: WorkspaceWidgetConfig[];
   activityLogs: ActivityLog[];

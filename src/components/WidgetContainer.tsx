@@ -396,11 +396,11 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({
       style={{
         backgroundColor: bgColor,
         color: textColor,
-        zIndex: isAnyMenuOpen ? 90 : (isFloating ? 50 : undefined),
+        zIndex: isAnyMenuOpen ? 9999 : (isFloating ? 50 : 1),
         ...floatingStyle,
       }}
       className={`rounded-2xl border transition-all duration-150 flex flex-col justify-between relative select-none group/widget shadow-sm hover:shadow-2xl backdrop-blur-2xl ${fontClass} ${sizeClass} ${
-        isAnyMenuOpen ? 'z-50 ring-2 ring-sky-400/40' : ''
+        isAnyMenuOpen ? 'z-[9999] ring-2 ring-sky-400/80 shadow-2xl' : 'hover:z-20'
       } ${
         isFloating
           ? 'border-sky-400/80 ring-2 ring-sky-500/30'
@@ -409,6 +409,17 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({
           : 'border-slate-200/90 hover:border-slate-300'
       } ${isExpanded ? 'h-full' : ''}`}
     >
+      {/* Invisible backdrop to capture clicks and guarantee menu is top-most without overlap */}
+      {isMenuOpen && (
+        <div
+          className="fixed inset-0 z-[99990] bg-transparent cursor-default pointer-events-auto"
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsMenuOpen(false);
+          }}
+        />
+      )}
+
       {/* Sleek Minimalist Widget Header (Only Title + Three Dots Menu) */}
       <div
         draggable={!isFloating && !isExpanded}
@@ -425,7 +436,7 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({
             setIsDraggingFloat(true);
           }
         }}
-        className={`flex items-center justify-between gap-2 px-3.5 py-2.5 border-b shrink-0 min-w-0 backdrop-blur-md rounded-t-2xl ${
+        className={`flex items-center justify-between gap-2 px-3.5 py-2.5 border-b shrink-0 min-w-0 backdrop-blur-md rounded-t-2xl relative z-10 ${
           isDark
             ? 'border-white/10 bg-black/25'
             : 'border-slate-200/80 bg-white/40'
@@ -444,7 +455,7 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({
         <div className="flex items-center gap-2 min-w-0 flex-1">
           <div
             className="cursor-grab active:cursor-grabbing text-current opacity-40 group-hover/widget:opacity-80 transition shrink-0 p-0.5"
-            title={isFa ? 'جابجایی موقعیت' : 'Drag'}
+            title={isFa ? 'جابجایی موقعیت ویجت' : 'Drag'}
           >
             <GripVertical className="w-3.5 h-3.5" />
           </div>
@@ -456,21 +467,31 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({
             {widget.customTitle || (isFa ? widget.titleFa : widget.title)}
           </h3>
 
+          {/* Coordinate badge in spatial mode */}
+          {custom.gridPosition && (
+            <span
+              className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-white/10 text-sky-300 opacity-60 group-hover/widget:opacity-100 transition shrink-0"
+              title={isFa ? `مختصات: ستون ${custom.gridPosition.col}، سطر ${custom.gridPosition.row}` : `C${custom.gridPosition.col}:R${custom.gridPosition.row}`}
+            >
+              C{custom.gridPosition.col}:R{custom.gridPosition.row}
+            </span>
+          )}
+
           {isFloating && (
             <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping shrink-0" />
           )}
         </div>
 
         {/* Corner Three-Dots Menu Button */}
-        <div className="relative shrink-0" ref={menuRef}>
+        <div className="relative shrink-0 z-[99995]" ref={menuRef}>
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsMenuOpen(!isMenuOpen);
             }}
-            className={`p-1 rounded-lg transition cursor-pointer text-current ${
+            className={`p-1 rounded-lg transition cursor-pointer text-current relative z-[99996] ${
               isMenuOpen
-                ? 'bg-sky-500 text-white shadow-sm'
+                ? 'bg-sky-500 text-white shadow-md ring-2 ring-sky-300/60'
                 : 'hover:bg-white/15 opacity-70 hover:opacity-100'
             }`}
             title={isFa ? 'منوی گزینه‌ها' : 'Options'}
@@ -478,13 +499,23 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({
             <MoreHorizontal className="w-4 h-4" />
           </button>
 
-          {/* Frosted Glass Dropdown Popover */}
+          {/* Frosted Glass Dropdown Popover with Top Stacking Context */}
           {isMenuOpen && (
             <div
-              className={`absolute top-full mt-1.5 z-[9999] w-56 bg-slate-900/98 text-white border border-white/20 rounded-2xl shadow-2xl backdrop-blur-3xl p-1.5 space-y-0.5 animate-in fade-in zoom-in-95 ${
+              className={`absolute top-full mt-2 z-[99999] w-64 bg-slate-900/98 text-white border border-white/20 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_20px_rgba(56,189,248,0.25)] backdrop-blur-3xl p-2 space-y-1 animate-in fade-in zoom-in-95 pointer-events-auto ${
                 isFa ? 'left-0' : 'right-0'
               }`}
+              style={{ isolation: 'isolate' }}
+              onClick={(e) => e.stopPropagation()}
             >
+              {/* Header Title */}
+              <div className="px-2 py-1 border-b border-white/10 flex items-center justify-between text-[11px] font-bold text-slate-300">
+                <span className="truncate">{widget.customTitle || (isFa ? widget.titleFa : widget.title)}</span>
+                <span className="text-[9px] font-mono text-sky-400">
+                  C{currentGridPos.col}:R{currentGridPos.row}
+                </span>
+              </div>
+
               {/* Customize Appearance */}
               <button
                 onClick={() => {
@@ -494,7 +525,7 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({
                 className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-200 hover:text-white hover:bg-white/15 transition cursor-pointer"
               >
                 <Palette className="w-3.5 h-3.5 text-amber-400" />
-                <span>{isFa ? 'تنظیمات رنگ و ابعاد' : 'Customize Theme & Size'}</span>
+                <span>{isFa ? 'شخصی‌سازی رنگ، ابعاد و موقعیت' : 'Customize Theme & Size'}</span>
               </button>
 
               {/* Fullscreen */}
@@ -530,7 +561,7 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({
                   {isFloating ? (
                     <>
                       <PinOff className="w-3.5 h-3.5 text-indigo-400" />
-                      <span>{isFa ? 'جای‌گذاری در شبکه' : 'Snap back to grid'}</span>
+                      <span>{isFa ? 'جای‌گذاری در بوم' : 'Snap back to canvas'}</span>
                     </>
                   ) : (
                     <>
@@ -541,38 +572,128 @@ export const WidgetContainer: React.FC<WidgetContainerProps> = ({
                 </button>
               )}
 
-              {/* Move Order / Free Spatial Reordering */}
+              {/* Free Spatial Direct Nudge / Coordinates (Android-style free placement) */}
+              {!isFloating && (
+                <div className="border-t border-white/10 pt-1.5 px-1 space-y-1.5">
+                  <div className="text-[10px] text-sky-300 font-bold flex items-center justify-between">
+                    <span className="flex items-center gap-1">
+                      <Move className="w-3 h-3 text-sky-400" />
+                      {isFa ? 'جابجایی آزاد در بوم (اندرویدی):' : 'Free Spatial Move:'}
+                    </span>
+                    <span className="font-mono text-[9px] text-slate-400">
+                      ({currentGridPos.col}, {currentGridPos.row})
+                    </span>
+                  </div>
+
+                  {/* 4-Direction Spatial Nudge Buttons */}
+                  <div className="grid grid-cols-4 gap-1">
+                    {/* Move Left / Right depending on RTL */}
+                    <button
+                      onClick={() => {
+                        const newCol = Math.max(1, currentGridPos.col - 1);
+                        onUpdateWidget({
+                          ...widget,
+                          customization: {
+                            ...widget.customization,
+                            gridPosition: { ...currentGridPos, col: newCol },
+                          },
+                        });
+                      }}
+                      className="flex items-center justify-center p-1.5 bg-white/5 hover:bg-white/15 rounded-lg text-[10px] font-bold text-slate-300 hover:text-white transition cursor-pointer"
+                      title={isFa ? 'یک ستون به قبل' : 'Nudge Left'}
+                    >
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Move Up */}
+                    <button
+                      onClick={() => {
+                        const newRow = Math.max(1, currentGridPos.row - 1);
+                        onUpdateWidget({
+                          ...widget,
+                          customization: {
+                            ...widget.customization,
+                            gridPosition: { ...currentGridPos, row: newRow },
+                          },
+                        });
+                      }}
+                      className="flex items-center justify-center p-1.5 bg-white/5 hover:bg-white/15 rounded-lg text-[10px] font-bold text-slate-300 hover:text-white transition cursor-pointer"
+                      title={isFa ? 'یک سطر به بالا' : 'Nudge Up'}
+                    >
+                      <ChevronUp className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Move Down */}
+                    <button
+                      onClick={() => {
+                        const newRow = currentGridPos.row + 1;
+                        onUpdateWidget({
+                          ...widget,
+                          customization: {
+                            ...widget.customization,
+                            gridPosition: { ...currentGridPos, row: newRow },
+                          },
+                        });
+                      }}
+                      className="flex items-center justify-center p-1.5 bg-white/5 hover:bg-white/15 rounded-lg text-[10px] font-bold text-slate-300 hover:text-white transition cursor-pointer"
+                      title={isFa ? 'یک سطر به پایین (ایجاد فضای خالی)' : 'Nudge Down (add gap)'}
+                    >
+                      <ChevronDown className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Move Right / Left */}
+                    <button
+                      onClick={() => {
+                        const newCol = Math.min(24, currentGridPos.col + 1);
+                        onUpdateWidget({
+                          ...widget,
+                          customization: {
+                            ...widget.customization,
+                            gridPosition: { ...currentGridPos, col: newCol },
+                          },
+                        });
+                      }}
+                      className="flex items-center justify-center p-1.5 bg-white/5 hover:bg-white/15 rounded-lg text-[10px] font-bold text-slate-300 hover:text-white transition cursor-pointer"
+                      title={isFa ? 'یک ستون به بعد' : 'Nudge Right'}
+                    >
+                      <ArrowLeft className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Move Order in Grid */}
               {onMoveWidget && !isFloating && (
                 <div className="border-t border-white/10 pt-1 mt-1 space-y-1">
                   <div className="text-[10px] text-slate-400 font-semibold px-1">
-                    {isFa ? 'جابجایی موقعیت در شبکه:' : 'Move Position in Grid:'}
+                    {isFa ? 'ترتیب چیدمان در صفحه:' : 'Sequential Order:'}
                   </div>
                   <div className="grid grid-cols-4 gap-1">
                     <button
                       onClick={() => onMoveWidget(widget.id, 'start')}
                       className="flex items-center justify-center p-1.5 bg-white/5 hover:bg-white/15 rounded-lg text-[11px] font-medium transition cursor-pointer text-slate-300 hover:text-white"
-                      title={isFa ? 'انتقال به ابتدای صفحه' : 'Move to top of board'}
+                      title={isFa ? 'انتقال به ابتدای صفحه' : 'Move to top'}
                     >
                       <ChevronsUp className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => onMoveWidget(widget.id, 'prev')}
                       className="flex items-center justify-center p-1.5 bg-white/5 hover:bg-white/15 rounded-lg text-[11px] font-medium transition cursor-pointer text-slate-300 hover:text-white"
-                      title={isFa ? 'یک خانه به عقب / قبل' : 'Move up/previous'}
+                      title={isFa ? 'یک خانه قبل' : 'Previous'}
                     >
                       <ChevronUp className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => onMoveWidget(widget.id, 'next')}
                       className="flex items-center justify-center p-1.5 bg-white/5 hover:bg-white/15 rounded-lg text-[11px] font-medium transition cursor-pointer text-slate-300 hover:text-white"
-                      title={isFa ? 'یک خانه به جلو / بعد' : 'Move down/next'}
+                      title={isFa ? 'یک خانه بعد' : 'Next'}
                     >
                       <ChevronDown className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => onMoveWidget(widget.id, 'end')}
                       className="flex items-center justify-center p-1.5 bg-white/5 hover:bg-white/15 rounded-lg text-[11px] font-medium transition cursor-pointer text-slate-300 hover:text-white"
-                      title={isFa ? 'انتقال به انتهای صفحه' : 'Move to bottom of board'}
+                      title={isFa ? 'انتقال به انتهای صفحه' : 'Move to end'}
                     >
                       <ChevronsDown className="w-3.5 h-3.5" />
                     </button>
